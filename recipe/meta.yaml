@@ -1,48 +1,45 @@
-context:
-  version: "35.1"
-  major: 7
-
 package:
   name: libprotobuf-bazel-systemlib
-  version: ${{ version }}
+  version: {{ libprotobuf }}
 
 source:
-  url: https://github.com/protocolbuffers/protobuf/releases/download/v${{ version }}/protobuf-${{ version }}.tar.gz
+  url: https://github.com/protocolbuffers/protobuf/releases/download/v{{ libprotobuf.split(".", 1)[1] }}/protobuf-{{ libprotobuf.split(".", 1)[1] }}.tar.gz
   sha256: f0b6838e7522a8da96126d487068c959bc624926368f3024ac8fd03abd0a1ac4
 
 build:
   number: 0
-  noarch: generic
+  skip: true  # [win]
 
 requirements:
   build:
     - sed
+  host:
+    - libprotobuf {{ libprotobuf }}
   run:
-    - libprotobuf ${{ major }}.${{ version }}.*
+    - libprotobuf {{ libprotobuf }}
 
-tests:
-  - package_contents:
-      files:
-        - share/bazel/systemlibs/protobuf/BUILD
-  - script: tests/run_test.sh
-    files:
-      recipe:
-        - tests/
-    requirements:
-      build:
-        - ${{ compiler('cxx') }}
-        - bazel >=8
-        - bazel-toolchain >=0.5.11
-      run:
-        - protobuf-bazel-rules
-        - protobuf ${{ major }}.${{ version }}.*
-        - libprotobuf ${{ major }}.${{ version }}.*
+test:
+  requires:
+    - cxx-compiler
+    - c-compiler
+    - bazel >=8
+    - bazel-toolchain >=0.5
+    - protobuf-bazel-rules
+    - protobuf {{ libprotobuf }}
+    - libprotobuf {{ libprotobuf }}
+  files:
+    - tests/
+  commands:
+    - test -f ${PREFIX}/share/bazel/systemlibs/protobuf/BUILD
+    - bash tests/run_test.sh
 
 about:
-  homepage: https://developers.google.com/protocol-buffers/
-  repository: https://github.com/conda-forge/libprotobuf-bazel-systemlib-feedstock
+  home: https://protobuf.dev
+  dev_url: https://github.com/conda-forge/libprotobuf-bazel-systemlib-feedstock
+  doc_url: https://protobuf.dev/overview
   license: Apache-2.0
   license_file: LICENSE
+  license_family: Apache
   summary: Bazel rules for protobuf
   description: |
     You can use the systemlib definitions by assembling them together with
